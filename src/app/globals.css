@@ -1,26 +1,46 @@
 @import "tailwindcss";
 
+/*
+  PhysioConnect design tokens.
+  These are project-specific — not Tailwind defaults — so every
+  component pulls from the same warm, muted palette by name
+  (bg-parchment, text-ink, etc.) instead of raw hex codes.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #16302b;       /* primary text / headings */
+  --color-paper: #f3f5f2;     /* page background */
+  --color-teal: #1f6f5c;      /* brand primary */
+  --color-coral: #e8734a;     /* recovery / accent */
+  --color-amber: #c98a2c;     /* attention / pending */
+  --color-sand: #e4ded2;      /* secondary card surface */
+  --color-parchment: #f7efe1; /* primary card surface */
+  --color-teal-wash: #eaf1ee; /* tinted surface */
+  --color-coral-wash: #fbebe3;/* tinted surface */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ink: var(--color-ink);
+  --color-paper: var(--color-paper);
+  --color-teal: var(--color-teal);
+  --color-coral: var(--color-coral);
+  --color-amber: var(--color-amber);
+  --color-sand: var(--color-sand);
+  --color-parchment: var(--color-parchment);
+  --color-teal-wash: var(--color-teal-wash);
+  --color-coral-wash: var(--color-coral-wash);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-inter);
+  --font-data: var(--font-plex-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+.dot-grid {
+  background-image: radial-gradient(#16302b22 1px, transparent 1px);
+  background-size: 22px 22px;
 }
