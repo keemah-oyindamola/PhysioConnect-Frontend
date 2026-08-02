@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { HeroArc } from "@/components/landing/HeroArc";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -22,9 +23,9 @@ export function Hero() {
           <button className="bg-teal text-white text-[14px] font-medium px-6 py-3.5 rounded-full hover:bg-[#195a4a] transition-colors shadow-[0_12px_24px_-10px_rgba(31,111,92,0.55)] flex items-center gap-2">
             Book a demo <ArrowRight size={15} />
           </button>
-          <button className="text-[14px] font-medium text-ink/70 border border-ink/15 px-6 py-3.5 rounded-full hover:border-ink/30 hover:bg-teal-wash transition-colors">
+          <Link href="/register" className="text-[14px] font-medium text-ink/70 border border-ink/15 px-6 py-3.5 rounded-full hover:border-ink/30 hover:bg-teal-wash transition-colors">
             I&apos;m a patient
-          </button>
+          </Link>
         </div>
         <div className="flex items-center gap-7">
           <div>

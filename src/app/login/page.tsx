@@ -1,7 +1,10 @@
-export default function AdminDashboardPage() {
+import { AuthShell } from "@/components/auth/AuthShell";
+import { LoginForm } from "@/components/auth/LoginForm";
+
+export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper text-ink">
-      <p className="font-display text-2xl">Admin dashboard — coming soon</p>
-    </div>
+    <AuthShell title="Welcome back" subtitle="Sign in">
+      <LoginForm />
+    </AuthShell>
   );
 }

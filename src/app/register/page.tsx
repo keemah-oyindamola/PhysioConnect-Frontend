@@ -1,7 +1,10 @@
-export default function RegisterDashboardPage() {
+import { AuthShell } from "@/components/auth/AuthShell";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+
+export default function RegisterPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper text-ink">
-      <p className="font-display text-2xl">Register dashboard — coming soon</p>
-    </div>
+    <AuthShell title="Create your account" subtitle="Get started">
+      <RegisterForm />
+    </AuthShell>
   );
 }

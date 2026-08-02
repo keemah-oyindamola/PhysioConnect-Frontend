@@ -2,6 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import { Wordmark } from "@/components/common/Logo";
+import Link from "next/link";
 
 const navLinks = [
   { id: "roles", label: "Who it's for" },
@@ -36,12 +37,12 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-3">
-          <button className="hidden sm:block text-[13.5px] font-medium text-ink/70 hover:text-ink">
+          <Link href="/login" className="hidden sm:block text-[13.5px] font-medium text-ink/70 hover:text-ink">
             Sign in
-          </button>
-          <button className="bg-teal text-white text-[13.5px] font-medium px-4 py-2.5 rounded-full hover:bg-[#195a4a] transition-colors shadow-[0_8px_20px_-8px_rgba(31,111,92,0.6)] flex items-center gap-1.5">
+          </Link>
+          <Link href="/register" className="bg-teal text-white text-[13.5px] font-medium px-4 py-2.5 rounded-full hover:bg-[#195a4a] transition-colors shadow-[0_8px_20px_-8px_rgba(31,111,92,0.6)] flex items-center gap-1.5">
             Get started <ArrowRight size={14} />
-          </button>
+          </Link>
         </div>
       </div>
     </header>

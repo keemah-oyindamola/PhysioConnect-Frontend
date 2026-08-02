@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/common/Reveal";
+import Link from "next/link";
 
 export function CTASection() {
   return (
@@ -12,9 +13,9 @@ export function CTASection() {
         <p className="text-[14.5px] text-ink/60 mb-8 max-w-sm mx-auto">
           Whether you&apos;re booking your first session or running a whole department — start here.
         </p>
-        <button className="bg-teal text-white text-[14px] font-medium px-7 py-3.5 rounded-full hover:bg-[#195a4a] transition-colors shadow-[0_16px_32px_-14px_rgba(31,111,92,0.6)] inline-flex items-center gap-2">
+        <Link href="/register" className="bg-teal text-white text-[14px] font-medium px-7 py-3.5 rounded-full hover:bg-[#195a4a] transition-colors shadow-[0_16px_32px_-14px_rgba(31,111,92,0.6)] inline-flex items-center gap-2">
           Get started <ArrowRight size={15} />
-        </button>
+        </Link>
       </Reveal>
     </section>
   );
