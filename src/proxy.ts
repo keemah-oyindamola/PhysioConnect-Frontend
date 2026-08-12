@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   if (!path.startsWith("/dashboard")) {
@@ -19,11 +19,9 @@ export async function middleware(req: NextRequest) {
       role: string;
     };
 
-    const roleFromUrl = path.split("/")[2]; // e.g. "admin" from /dashboard/admin
+    const roleFromUrl = path.split("/")[2];
 
     if (roleFromUrl && payload.role.toLowerCase() !== roleFromUrl) {
-      // Logged in, but trying to view someone else's dashboard —
-      // send them to their own instead of letting the request through.
       return NextResponse.redirect(
         new URL(`/dashboard/${payload.role.toLowerCase()}`, req.url)
       );
