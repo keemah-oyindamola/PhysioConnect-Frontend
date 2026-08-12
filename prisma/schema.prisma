@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PATIENT
+  THERAPIST
+  RECEPTIONIST
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+
+  patient   Patient?
+  therapist Therapist?
+}
+
+model Patient {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id])
+  dateOfBirth      DateTime?
+  gender           String?
+  phone            String?
+  bloodGroup       String?
+  emergencyContact String?
+  createdAt        DateTime  @default(now())
+  appointments Appointment[]
+}
+
+model Therapist {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  specialty String?
+  bio       String?
+  createdAt DateTime @default(now())
+  appointments Appointment[]
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  patient     Patient           @relation(fields: [patientId], references: [id])
+  therapistId String
+  therapist   Therapist         @relation(fields: [therapistId], references: [id])
+  dateTime    DateTime
+  reason      String
+  status      AppointmentStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+}
