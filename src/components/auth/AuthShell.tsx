@@ -5,10 +5,12 @@ export function AuthShell({
   children,
   title,
   subtitle,
+  footer,
 }: {
   children: ReactNode;
   title: string;
   subtitle: string;
+  footer?: ReactNode;
 }) {
   return (
     <div className="min-h-screen w-full grid md:grid-cols-2 bg-paper text-ink">
@@ -61,6 +63,7 @@ export function AuthShell({
           <p className="font-mono text-[11px] uppercase tracking-widest text-coral mb-2">{subtitle}</p>
           <h1 className="font-display text-[30px] font-medium tracking-tight mb-8">{title}</h1>
           {children}
+          {footer && <p className="text-center text-[13px] text-ink/60 mt-6">{footer}</p>}
         </div>
       </div>
     </div>
