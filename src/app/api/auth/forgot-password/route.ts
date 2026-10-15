@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
       message: "If an account exists for that email, a reset link has been sent.",
     });
 
-    if (!user) {
-      return genericResponse;
-    }
+   if (!user || !user.isActive) {
+  return genericResponse;
+}
 
     const rawToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");

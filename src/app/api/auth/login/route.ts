@@ -24,6 +24,12 @@ export async function POST(req: NextRequest) {
         if (!passwordMatches) {
             return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
         }
+        if (!user.isActive) {
+            return NextResponse.json(
+                { error: "This account has been deactivated. Please contact your clinic administrator." },
+                { status: 403 }
+            );
+        }
 
         const token = jwt.sign(
             { userId: user.id, role: user.role },

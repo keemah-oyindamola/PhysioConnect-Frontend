@@ -1,11 +1,22 @@
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
 import { StaffForm } from "@/components/dashboard/StaffForm";
+import { StaffActions } from "@/components/dashboard/StaffActions";
 
 export default async function StaffPage() {
+  const session = await getSession();
+
   const staff = await prisma.user.findMany({
     where: { role: { in: ["THERAPIST", "RECEPTIONIST", "ADMIN"] } },
     orderBy: { createdAt: "desc" },
-    select: { id: true, name: true, email: true, role: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+    },
   });
 
   const roleBadge: Record<string, string> = {
@@ -39,19 +50,38 @@ export default async function StaffPage() {
           </p>
         ) : (
           <div className="flex flex-col divide-y divide-ink/6">
-            {staff.map((s) => (
-              <div key={s.id} className="flex items-center justify-between py-3">
-                <div>
-                  <p className="text-[13.5px] font-medium">{s.name}</p>
-                  <p className="text-[12px] text-ink/50">{s.email}</p>
-                </div>
-                <span
-                  className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${roleBadge[s.role]}`}
+            {staff.map((s) => {
+              const isSelf = s.id === session?.userId;
+              return (
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
                 >
-                  {s.role.charAt(0) + s.role.slice(1).toLowerCase()}
-                </span>
-              </div>
-            ))}
+                  <div className={`min-w-0 ${s.isActive ? "" : "opacity-50"}`}>
+                    <p className="text-[13.5px] font-medium truncate">
+                      {s.name}
+                      {isSelf && <span className="text-ink/40 font-normal"> (you)</span>}
+                    </p>
+                    <p className="text-[12px] text-ink/50 truncate">{s.email}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {!s.isActive && (
+                      <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-ink/8 text-ink/60">
+                        Deactivated
+                      </span>
+                    )}
+                    <span
+                      className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${roleBadge[s.role]}`}
+                    >
+                      {s.role.charAt(0) + s.role.slice(1).toLowerCase()}
+                    </span>
+                    {!isSelf && (
+                      <StaffActions id={s.id} name={s.name} isActive={s.isActive} />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
