@@ -1,6 +1,8 @@
 import { Calendar, Activity, FileText, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { formatDateTime } from "@/lib/booking";
 
 export default async function PatientDashboardPage() {
   const session = await getSession();
@@ -10,7 +12,7 @@ export default async function PatientDashboardPage() {
     include: {
       appointments: {
         orderBy: { dateTime: "asc" },
-        where: { dateTime: { gte: new Date() } },
+        where: { dateTime: { gte: new Date() }, status: { not: "CANCELLED" } },
         take: 5,
       },
       user: { select: { name: true } },
@@ -58,9 +60,12 @@ export default async function PatientDashboardPage() {
             <p className="text-[12.5px] text-ink/40 mb-5">
               Book your first session to get started.
             </p>
-            <button className="bg-teal text-white text-[13.5px] font-medium px-5 py-2.5 rounded-full inline-flex items-center gap-2 hover:bg-[#195a4a] transition-colors">
+            <Link
+              href="/dashboard/patient/appointments"
+              className="bg-teal text-white text-[13.5px] font-medium px-5 py-2.5 rounded-full inline-flex items-center gap-2 hover:bg-[#195a4a] transition-colors"
+            >
               Book an appointment <ArrowRight size={14} />
-            </button>
+            </Link>
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-ink/6">
@@ -69,7 +74,7 @@ export default async function PatientDashboardPage() {
                 <div>
                   <p className="text-[13.5px] font-medium">{appt.reason}</p>
                   <p className="text-[12px] text-ink/50">
-                    {appt.dateTime.toLocaleString()}
+                    {formatDateTime(appt.dateTime)}
                   </p>
                 </div>
                 <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-teal/10 text-teal">

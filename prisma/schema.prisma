@@ -75,4 +75,5 @@ model Appointment {
   reason      String
   status      AppointmentStatus @default(PENDING)
   createdAt   DateTime          @default(now())
+  slotKey     String?           @unique
 }
