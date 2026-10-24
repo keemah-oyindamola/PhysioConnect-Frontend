@@ -63,3 +63,18 @@ export function formatDateTime(when: Date): string {
     hour12: true,
   });
 }
+
+export function clinicDayRange(date: string = todayInClinic()): { start: Date; end: Date } {
+  const start = new Date(`${date}T00:00:00${CLINIC_OFFSET}`);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return { start, end };
+}
+
+export function formatTime(when: Date): string {
+  return when.toLocaleTimeString("en-GB", {
+    timeZone: CLINIC_TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
