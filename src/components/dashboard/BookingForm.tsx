@@ -6,19 +6,27 @@ import { Loader2, CalendarPlus } from "lucide-react";
 import { formatHour } from "@/lib/booking";
 
 type Therapist = { id: string; name: string; specialty: string | null };
+type PatientOption = { id: string; name: string; email: string };
 
 export function BookingForm({
   therapists,
+  patients,
   minDate,
   maxDate,
 }: {
   therapists: Therapist[];
+  patients?: PatientOption[];
   minDate: string;
   maxDate: string;
 }) {
   const router = useRouter();
   const requestRef = useRef(0);
 
+  // When a patients list is passed, the front desk is booking on someone's behalf.
+  const walkIn = patients !== undefined;
+
+  const [patientQuery, setPatientQuery] = useState("");
+  const [patientId, setPatientId] = useState("");
   const [therapistId, setTherapistId] = useState("");
   const [date, setDate] = useState("");
   const [hours, setHours] = useState<number[]>([]);
@@ -31,8 +39,7 @@ export function BookingForm({
   const [success, setSuccess] = useState("");
 
   const loadSlots = async (tid: string, d: string) => {
-    // If the patient changes the date again before this finishes,
-    // the older response is ignored.
+    // If the date changes again before this finishes, the older response is ignored.
     const requestId = ++requestRef.current;
     setHour(null);
     setHours([]);
@@ -69,8 +76,12 @@ export function BookingForm({
     setError("");
     setSuccess("");
 
+    if (walkIn && !patientId) {
+      setError("Please choose a patient.");
+      return;
+    }
     if (!therapistId || !date || hour === null || reason.trim().length < 3) {
-      setError("Please choose a physiotherapist, a date, a time, and describe your reason for visiting.");
+      setError("Please choose a physiotherapist, a date, a time, and describe the reason for the visit.");
       return;
     }
 
@@ -79,7 +90,11 @@ export function BookingForm({
       const res = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ therapistId, date, hour, reason }),
+        body: JSON.stringify(
+          walkIn
+            ? { patientId, therapistId, date, hour, reason }
+            : { therapistId, date, hour, reason }
+        ),
       });
       const data = await res.json();
 
@@ -89,8 +104,16 @@ export function BookingForm({
         return;
       }
 
-      setSuccess("Appointment requested. Your physiotherapist will confirm it shortly.");
+      setSuccess(
+        walkIn
+          ? "Appointment booked and confirmed."
+          : "Appointment requested. Your physiotherapist will confirm it shortly."
+      );
       setReason("");
+      if (walkIn) {
+        setPatientId("");
+        setPatientQuery("");
+      }
       loadSlots(therapistId, date);
       router.refresh();
     } catch {
@@ -112,8 +135,42 @@ export function BookingForm({
     );
   }
 
+  if (walkIn && patients.length === 0) {
+    return <p className="text-[13.5px] text-ink/60">No patients have registered yet.</p>;
+  }
+
+  const query = patientQuery.trim().toLowerCase();
+  const visiblePatients = (patients ?? []).filter(
+    (p) => p.id === patientId || `${p.name} ${p.email}`.toLowerCase().includes(query)
+  );
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {walkIn && (
+        <div>
+          <label className="text-[12.5px] font-medium text-ink/70 mb-1.5 block">Patient</label>
+          <input
+            type="search"
+            value={patientQuery}
+            onChange={(e) => setPatientQuery(e.target.value)}
+            placeholder="Search by name or email..."
+            className={`${inputClass} mb-2`}
+          />
+          <select
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Choose a patient...</option>
+            {visiblePatients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} ({p.email})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[12.5px] font-medium text-ink/70 mb-1.5 block">
@@ -207,7 +264,7 @@ export function BookingForm({
         className="self-start bg-teal text-white text-[14px] font-medium px-5 py-2.5 rounded-xl hover:bg-[#195a4a] transition-colors flex items-center gap-2 disabled:opacity-70"
       >
         {submitting ? <Loader2 size={16} className="animate-spin" /> : <CalendarPlus size={16} />}
-        {submitting ? "Booking..." : "Request appointment"}
+        {submitting ? "Booking..." : walkIn ? "Book appointment" : "Request appointment"}
       </button>
     </form>
   );

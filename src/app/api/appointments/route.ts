@@ -6,9 +6,7 @@ import { SLOT_HOURS, dateProblem, slotDateTime, makeSlotKey } from "@/lib/bookin
 export async function POST(req: NextRequest) {
   const session = await getSession();
 
-  // Same lesson as the staff routes: proxy.ts doesn't cover /api,
-  // so the role check has to live here.
-  if (!session || session.role !== "PATIENT") {
+  if (!session || (session.role !== "PATIENT" && session.role !== "RECEPTIONIST")) {
     return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   }
 
@@ -24,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
     if (reason.length < 3 || reason.length > 200) {
       return NextResponse.json(
-        { error: "Please describe your reason for visiting (3 to 200 characters)." },
+        { error: "Please describe the reason for the visit (3 to 200 characters)." },
         { status: 400 }
       );
     }
@@ -39,12 +37,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "That time has already passed." }, { status: 400 });
     }
 
-    const patient = await prisma.patient.findUnique({
-      where: { userId: session.userId },
-      select: { id: true },
-    });
-    if (!patient) {
-      return NextResponse.json({ error: "Patient profile not found." }, { status: 404 });
+    // A patient always books for themselves, whatever the request body says.
+    // Only the front desk may name a patient.
+    let patientId: string;
+    if (session.role === "PATIENT") {
+      const patient = await prisma.patient.findUnique({
+        where: { userId: session.userId },
+        select: { id: true },
+      });
+      if (!patient) {
+        return NextResponse.json({ error: "Patient profile not found." }, { status: 404 });
+      }
+      patientId = patient.id;
+    } else {
+      const chosen = typeof body.patientId === "string" ? body.patientId : "";
+      const patient = chosen
+        ? await prisma.patient.findFirst({
+            where: { id: chosen, user: { isActive: true } },
+            select: { id: true },
+          })
+        : null;
+      if (!patient) {
+        return NextResponse.json({ error: "Please choose a patient." }, { status: 400 });
+      }
+      patientId = patient.id;
     }
 
     const therapist = await prisma.therapist.findFirst({
@@ -57,15 +73,22 @@ export async function POST(req: NextRequest) {
 
     const appointment = await prisma.appointment.create({
       data: {
-        patientId: patient.id,
+        patientId,
         therapistId: therapist.id,
         dateTime: when,
         reason,
+        status: session.role === "RECEPTIONIST" ? ("CONFIRMED" as const) : ("PENDING" as const),
         slotKey: makeSlotKey(therapist.id, when),
       },
     });
 
-    return NextResponse.json({ message: "Appointment requested.", id: appointment.id }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: session.role === "RECEPTIONIST" ? "Appointment booked." : "Appointment requested.",
+        id: appointment.id,
+      },
+      { status: 201 }
+    );
   } catch (err) {
     // P2002 = unique constraint violation: someone else took this slot in the same instant.
     if ((err as { code?: string }).code === "P2002") {
